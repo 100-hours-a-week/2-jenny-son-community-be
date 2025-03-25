@@ -38,6 +38,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws IOException, ServletException {
 
+        // 이미지 요청
+        String uri = request.getRequestURI();
+        if (uri.startsWith("/uploads/")) {
+            chain.doFilter(request, response);
+            return;
+        }
+
         // Authroization 헤더에서 토큰 추출 ("Bearer " 이후 값)
         String authorizationHeader = request.getHeader("Authorization");
 
