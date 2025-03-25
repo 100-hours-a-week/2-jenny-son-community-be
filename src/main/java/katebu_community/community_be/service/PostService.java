@@ -1,10 +1,14 @@
 package katebu_community.community_be.service;
 
+import katebu_community.community_be.domain.Likes;
 import katebu_community.community_be.domain.Post;
 import katebu_community.community_be.domain.User;
 import katebu_community.community_be.dto.*;
+import katebu_community.community_be.exception.AlreadyLikedException;
+import katebu_community.community_be.exception.AlreadyUnlikedException;
 import katebu_community.community_be.exception.PostNotFoundException;
 import katebu_community.community_be.exception.UnauthorizedException;
+import katebu_community.community_be.repository.LikesRepository;
 import katebu_community.community_be.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -23,6 +27,7 @@ import java.util.stream.Collectors;
 public class PostService {
 
     private final PostRepository postRepository;
+    private final LikesRepository likesRepository;
     private final FileUploadService fileUploadService;
     private final UserCommonService userCommonService;
 
@@ -122,6 +127,7 @@ public class PostService {
                         .writerName(post.getUser().getNickname())
                         .writerImg(post.getUser().getProfileUrl())
                         .build())
+                .liked(userId != null && likesRepository.existsByPostIdAndUserId(postId, userId))
                 .author(userId != null && userId.equals(post.getUser().getId()))
                 .build();
     }
@@ -173,5 +179,55 @@ public class PostService {
                 .size(postPage.getSize())
                 .number(postPage.getNumber())
                 .build();
+    }
+
+    // 좋아요 추가
+    @Transactional
+    public void addLike(Long userId, Long postId) {
+        // 게시글 조회
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new PostNotFoundException("게시글 없음"));
+
+        // 중복 좋아요 여부 확인
+        if (likesRepository.existsByPostIdAndUserId(postId, userId)) {
+            throw new AlreadyLikedException("이미 좋아요를 눌렀습니다.");
+        }
+
+        // 좋아요 추가
+        Likes like = Likes.builder()
+                .postId(postId)
+                .userId(userId)
+                .build();
+        likesRepository.save(like);
+
+        // 게시글의 좋아요 수 증가
+        post.setLikeCnt(post.getLikeCnt() + 1);
+        postRepository.save(post);
+    }
+
+    // 좋아요 삭제
+    @Transactional
+    public void deleteLike(Long userId, Long postId) {
+        // 게시글 조회
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new PostNotFoundException("게시글 없음"));
+
+        // 좋아요 조회
+        Likes like = likesRepository.findByPostIdAndUserId(postId, userId)
+                .orElse(null);
+
+        if (like != null) {
+            // 좋아요 삭제
+            likesRepository.delete(like);
+            // 게시글의 좋아요 수 감소
+            if (post.getLikeCnt() > 0) {
+                post.setLikeCnt(post.getLikeCnt() - 1);
+            } else {
+                post.setLikeCnt(0);
+            }
+            postRepository.save(post);
+        } else {
+            throw new AlreadyUnlikedException("이미 좋아요를 취소했습니다.");
+        }
     }
 }
