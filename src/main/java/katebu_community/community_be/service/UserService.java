@@ -50,6 +50,7 @@ public class UserService {
 
         // 프로필 이미지 업데이트 (파일이 제공된 경우)
         if (profileImg != null && !profileImg.isEmpty()) {
+            fileUploadService.deleteImage(user.getProfileUrl()); // 기존 이미지 삭제
             String profileImgUrl = fileUploadService.uploadImage(profileImg);
             user.setProfileUrl(profileImgUrl);
         }
@@ -80,6 +81,9 @@ public class UserService {
     public void deleteUser(Long userId) {
         // 회원 조회
         User user = userCommonService.getUserOrThrow(userId);
+
+        // 프로필 이미지 삭제
+        fileUploadService.deleteImage(user.getProfileUrl());
 
         // 회원 삭제
         userRepository.delete(user);
