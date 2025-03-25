@@ -65,10 +65,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 return;
             }
         } else {
-            // 게시글 상세 조회 요청은 토큰이 없어도 접근 가능하도록 통과 (토큰이 있다면 if문 안에서 ID 추출)
+            // 게시글 상세 조회 요청 & 댓글 목록 조회 요청은 토큰이 없어도 접근 가능하도록 통과 (토큰이 있다면 if문 안에서 ID 추출)
             String path = request.getServletPath();
             if ("GET".equalsIgnoreCase(request.getMethod()) &&
-                    path.matches("^/posts/\\d+$")) {
+                    (path.matches("^/posts/\\d+$") || path.matches("^/posts/\\d+/comments$"))) {
                 chain.doFilter(request, response);
                 return;
             }

@@ -1,6 +1,5 @@
 package katebu_community.community_be.config;
 
-import katebu_community.community_be.security.CustomAuthenticationEntryPoint;
 import katebu_community.community_be.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -46,6 +45,7 @@ public class SecurityConfig {
                         .requestMatchers("/uploads/**").permitAll() // 이미지 요청
                         .requestMatchers("/auth/login", "/auth/register").permitAll() // 로그인과 회원가입 API는 누구나 접근 가능
                         .requestMatchers(HttpMethod.GET, "/posts", "/posts/*").permitAll()  // 게시글 목록 조회, 게시글 조회
+                        .requestMatchers(new RegexRequestMatcher("^/posts/\\d+/comments$", "GET")).permitAll() // 댓글 목록 조회
                         .anyRequest().authenticated() // 나머지 요청은 인증 필요
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // JWT를 사용할 거라 세션을 stateless로 설정
