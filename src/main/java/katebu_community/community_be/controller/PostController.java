@@ -164,4 +164,50 @@ public class PostController {
                     .body(new ApiResponse("잘못된 요청", null));
         }
     }
+
+    // 좋아요 추가
+    @PostMapping("/{postid}/like")
+    public ResponseEntity<ApiResponse> addLike(
+            @PathVariable("postid") Long postId,
+            @AuthenticationPrincipal Long userId) {
+
+        // 좋아요 추가 로직 호출
+        try {
+            postService.addLike(userId, postId);
+            // 성공
+            return ResponseEntity
+                    .ok(new ApiResponse("좋아요 추가 성공", null));
+        } catch (PostNotFoundException e) {
+            // 게시글 없음
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(new ApiResponse("게시글 없음", null));
+        } catch (AlreadyLikedException e) {
+            return ResponseEntity
+                    .ok(new ApiResponse("이미 좋아요를 눌렀습니다.", null));
+        }
+    }
+
+    // 좋아요 삭제
+    @DeleteMapping("/{postid}/like")
+    public ResponseEntity<ApiResponse> deleteLike(
+            @PathVariable("postid") Long postId,
+            @AuthenticationPrincipal Long userId) {
+
+        // 좋아요 삭제 로직 호출
+        try {
+            postService.deleteLike(userId, postId);
+            // 성공
+            return ResponseEntity
+                    .ok(new ApiResponse("좋아요 삭제 성공", null));
+        } catch (PostNotFoundException e) {
+            // 게시글 없음
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(new ApiResponse("게시글 없음", null));
+        } catch (AlreadyUnlikedException e) {
+            return ResponseEntity
+                    .ok(new ApiResponse("이미 좋아요를 취소했습니다.", null));
+        }
+    }
 }
