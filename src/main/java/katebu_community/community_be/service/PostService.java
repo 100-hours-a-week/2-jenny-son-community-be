@@ -8,6 +8,7 @@ import katebu_community.community_be.exception.AlreadyLikedException;
 import katebu_community.community_be.exception.AlreadyUnlikedException;
 import katebu_community.community_be.exception.PostNotFoundException;
 import katebu_community.community_be.exception.UnauthorizedException;
+import katebu_community.community_be.repository.CommentRepository;
 import katebu_community.community_be.repository.LikesRepository;
 import katebu_community.community_be.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
 public class PostService {
 
     private final PostRepository postRepository;
+    private final CommentRepository commentRepository;
     private final LikesRepository likesRepository;
     private final FileUploadService fileUploadService;
     private final UserCommonService userCommonService;
@@ -92,6 +94,9 @@ public class PostService {
         if (!post.getUser().getId().equals(userId)) {
             throw new UnauthorizedException("권한 없음");
         }
+
+        // 게시글 삭제 전 댓글 삭제
+        commentRepository.deleteByPostId(postId);
 
         // 본문 이미지 삭제
         fileUploadService.deleteImage(post.getImgUrl());
