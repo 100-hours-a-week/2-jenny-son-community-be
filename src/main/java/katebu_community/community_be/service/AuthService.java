@@ -45,7 +45,7 @@ public class AuthService {
             throw new DuplicateException("중복된 닉네임입니다.");
         }
 
-        // 이미지 처리 (퍼블릭 URL)
+        // 이미지 업로드 및 URL 반환
         String profileImgUrl = fileUploadService.uploadImage(profileImg);
 
         // 비밀번호 암호화 후 저장
@@ -56,7 +56,7 @@ public class AuthService {
                 .profileUrl(profileImgUrl)
                 .build();
 
-        userRepository.save(user);  // 디비에 저장
+        userRepository.save(user);
     }
 
     // 로그인
