@@ -1,8 +1,11 @@
 package katebu_community.community_be.service;
 
+import katebu_community.community_be.domain.Post;
 import katebu_community.community_be.domain.User;
 import katebu_community.community_be.dto.UserDto;
 import katebu_community.community_be.exception.DuplicateException;
+import katebu_community.community_be.repository.CommentRepository;
+import katebu_community.community_be.repository.PostRepository;
 import katebu_community.community_be.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,6 +20,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final PostRepository postRepository;
+    private final CommentRepository commentRepository;
     private final PasswordEncoder passwordEncoder;
     private final FileUploadService fileUploadService;
     private final UserCommonService userCommonService;
@@ -81,6 +86,13 @@ public class UserService {
     public void deleteUser(Long userId) {
         // 회원 조회
         User user = userCommonService.getUserOrThrow(userId);
+
+        // 회원 삭제 전 게시글과 댓글 삭제
+        List<Post> posts = postRepository.findByUserId(userId);
+        for (Post post : posts) {
+            commentRepository.deleteByPostId(post.getId());
+        }
+        postRepository.deleteByUserId(userId);
 
         // 프로필 이미지 삭제
         fileUploadService.deleteImage(user.getProfileUrl());
