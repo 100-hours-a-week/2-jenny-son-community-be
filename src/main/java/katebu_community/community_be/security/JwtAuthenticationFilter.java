@@ -27,19 +27,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (path.startsWith("/auth")) {
             return true;
         }
+        // 게시글 목록 조회
+        if ("GET".equalsIgnoreCase(request.getMethod()) && path.matches("/posts")) {
+            return true;
+        }
         return false;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws IOException, ServletException {
-
-        // 이미지 요청
-        String uri = request.getRequestURI();
-        if (uri.startsWith("/uploads/")) {
-            chain.doFilter(request, response);
-            return;
-        }
 
         // Authroization 헤더에서 토큰 추출 ("Bearer " 이후 값)
         String authorizationHeader = request.getHeader("Authorization");
@@ -68,6 +65,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 return;
             }
         } else {
+            // 게시글 상세 조회 요청은 토큰이 없어도 접근 가능하도록 통과 (토큰이 있다면 if문 안에서 ID 추출)
+            String path = request.getServletPath();
+            if ("GET".equalsIgnoreCase(request.getMethod()) &&
+                    path.matches("^/posts/\\d+$")) {
+                chain.doFilter(request, response);
+                return;
+            }
+
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "인증 정보가 누락되었습니다.");
             return;
         }
