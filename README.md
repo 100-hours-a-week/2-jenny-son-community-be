@@ -4,7 +4,9 @@
 
 Spring Boot 기반의 커뮤니티 백엔드 애플리케이션입니다.
 
-주요 기능으로는 유저 인증(JWT 기반), 게시글/댓글 작성, 좋아요, 이미지 업로드가 있습니다.
+주요 기능으로는 유저 인증(JWT 기반), 게시글/댓글 작성, 좋아요, 이미지 업로드가 있습니다.  
+ 
+[(📂 프론트엔드 프로젝트 리포지토리)](https://github.com/100-hours-a-week/2-jenny-son-community-fe)
 
 ## 2. 사용 기술
 
@@ -52,20 +54,105 @@ Spring Boot 기반의 커뮤니티 백엔드 애플리케이션입니다.
 
 ```java
 katebu_community.community_be 
-├── config                       # 보안 설정(SecurityConfig) 및 글로벌 설정 
-├── controller                   # REST API 엔드포인트 담당 
-├── domain                       # 엔티티(Entity) 클래스 
-├── dto                          # Request/Response DTO 
-├── exception                    # 예외 처리 관련 클래스 
-├── repository                   # 데이터베이스 접근 (JPA Repository) 
-├── security                     # JWT 인증/인가 및 보안 관련 로직 
-├── service                      # 비즈니스 로직 
-└── CommunityBeApplication.java  # Spring Boot 메인 클래스
+├── config                       // 보안 설정(SecurityConfig) 및 글로벌 설정 
+├── controller                   // REST API 엔드포인트 담당 
+├── domain                       // 엔티티(Entity) 클래스 
+├── dto                          // Request/Response DTO 
+├── exception                    // 예외 처리 관련 클래스 
+├── repository                   // 데이터베이스 접근 (JPA Repository) 
+├── security                     // JWT 인증/인가 및 보안 관련 로직 
+├── service                      // 비즈니스 로직 
+└── CommunityBeApplication.java  // Spring Boot 메인 클래스
 ```
+<details>
+<summary>파일 설명</summary>
+  
+```java
+katebu_community.community_be 
+├── config 📁                      
+│   ├── SecurityConfig        // 보안 구성, CORS 정책
+│   └── WebConfig             // 웹 관련 설정
+├── controller 📁
+│   ├── AuthController        // 회원가입, 로그인 처리
+│   ├── CommentController     // 댓글 CRUD
+│   ├── PostController        // 게시글 CRUD, 게시글 목록 조회, 좋아요 추가/삭제
+│   └── UserController        // 회원정보 조회/수정, 비밀번호 변경, 회원탈퇴 처리
+├── domain 📁 
+│   ├── Comment
+│   ├── Likes
+│   ├── Post
+│   └── User
+├── dto 📁                          
+│   ├── ApiResponse            // 공통 응답 DTO 
+│   ├── CommentListResponse    // 댓글 목록 조회 응답 data 
+│   ├── CommentRequestDTO      // 댓글 작성 요청 body
+│   ├── LoginRequestDto        // 로그인 요청 body
+│   ├── LoginResponseDto       // 로그인 응답 data
+│   ├── PageableInfoDto        // 페이징 정보 (PostListResponseDto에 포함)
+│   ├── PostDetailDto          // 게시글 상세 조회 응답 data 
+│   ├── PostListResponseDto    // 게시글 목록 조회 응답 data
+│   ├── PostSummaryDto         // 게시글 요약 정보 (PostListResponseDto에 포함)
+│   ├── UserDto                // 유저 정보 (Auth, User 기능에서 포함)
+│   └── WriterDto              // 작성자 정보 (PostDetailDto에 포함)
+├── exception 📁                     
+│   ├── AlreadyLikedException
+│   ├── AlreadyUnlikedException
+│   ├── CommentNotFoundException
+│   ├── DuplicateException
+│   ├── EmailNotFoundException
+│   ├── GlobalExceptionHandler  // 전역 예외 처리 핸들러 (컨트롤러에서 처리하지 않은 모든 예외 처리)
+│   ├── InvalidInputException
+│   ├── InvalidPasswordException
+│   ├── PostNotFoundException
+│   └── UnauthorizedException
+├── repository 📁             
+│   ├── CommentRepository
+│   ├── LikesRepository
+│   ├── PostRepository
+│   └── UserRepository
+├── security 📁             
+│   ├── CustomAuthenticationEntryPoint // 인증 실패 처리 (401 반환)
+│   ├── JwtAuthenticationFilter        // 인증 필터
+│   └── JwtTokenProvider               // 토큰 생성, 검증, 아이디 추출
+├── service 📁               
+│   ├── AuthService
+│   ├── CommentService
+│   ├── FileUploadService       // 이미지 업로드/삭제 공통 서비스
+│   ├── PostService
+│   ├── UserCommonService       // 유저 조회 공통 서비스
+│   └── UserService
+└── CommunityBeApplication
+```
+</details>
 
 ## 4. 기능
 
 [🔗 시연 영상 보러가기](https://www.youtube.com/watch?v=CDuhguLbHp4)
+
+<details>
+  <summary>서비스 화면 보기</summary>
+  
+|로그인|회원가입|
+|---|---|
+|![로그인](https://github.com/user-attachments/assets/76ec1a22-168e-496d-b510-35fa236e33cb)|![회원가입](https://github.com/user-attachments/assets/f66505a2-4643-421d-a4bb-2ed93cdea80c)|
+
+|게시판(로그인)|게시판(비로그인)|
+|---|---|
+|![로그인](https://github.com/user-attachments/assets/d3c18cd4-f1d9-40a7-ad8d-9b2caaf7c777)|![회원가입](https://github.com/user-attachments/assets/97fb3853-dbf4-4a3c-9a04-c10d3b5fd3a0)|
+
+
+|게시글|게시글 수정|게시글 작성|게시글 삭제|
+|---|---|---|---|
+|![게시글](https://github.com/user-attachments/assets/c0f78a82-c25b-4c03-96e5-82b2677fba6e)|![게시글 수정](https://github.com/user-attachments/assets/13ea96e0-857f-49d5-8cf0-681d06e5cda4)|![게시글 작성](https://github.com/user-attachments/assets/afbe5c59-2806-4d77-b519-e4263e255c45)|![게시글 삭제](https://github.com/user-attachments/assets/85f0a7f9-308e-4d4a-b8ee-6539a99b2229)|
+
+|댓글|댓글 수정|댓글 삭제|
+|---|---|---|
+|![댓글](https://github.com/user-attachments/assets/d6293772-de59-4a81-8745-4157c18826af)|![댓글 수정](https://github.com/user-attachments/assets/74409b9a-ba43-483c-8419-9f41f536ccd9)|![댓글 삭제](https://github.com/user-attachments/assets/e0d174ba-0591-4662-8b2a-b23db30b45af)|
+
+|회원정보 수정|비밀번호 변경|회원탈퇴|
+|---|---|---|
+|![회원정보 수정](https://github.com/user-attachments/assets/3f6ddcea-afe8-4bca-b732-98e84513b726)|![비밀번호 변경](https://github.com/user-attachments/assets/0dc29dc9-dadd-4bc9-bc6c-ff0d15af1a8f)|![회원탈퇴](https://github.com/user-attachments/assets/934623ed-ea73-4b9b-89f3-283306267b07)|
+</details>
 
 ### 1) 사용자
 
